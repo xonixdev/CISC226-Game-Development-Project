@@ -17,18 +17,28 @@ public class Projectile : MonoBehaviour
     [Tooltip("All layers that the projectile should impact")]
     [SerializeField]  private LayerMask impactLayers;
 
+    private DamageFlash _DamageFlash;
+
     void Start()
     {
         Destroy(gameObject, lifetime);
+        _DamageFlash = GetComponent<DamageFlash>();
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
         if (IsInLayerMask(other.gameObject.layer, playerLayer))
         {
-            // TODO handle player impact
+            //TODO handle player impact
             _anim.SetTrigger(ProjectileImpact);
             StartCoroutine(DestroyAfterAnimation());
+
+            //Player Damage Flash
+            other.gameObject.GetComponent<DamageFlash>()?.FlashDamage();
+
+            // Call the DecreaseHealth()
+            //other.gameObject.GetComponent<PlayerHealth>()?.TakeDamage(damageAmount);
+
 
         }
         // Check if the collided object belongs to one of the ImpactLayers

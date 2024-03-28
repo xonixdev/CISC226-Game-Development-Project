@@ -27,7 +27,17 @@ public class FlyingEnemy : MonoBehaviour
     private float horizontalOffset = 5f;
     private float verticalOffset = 5f;
 
-    // Start is called before the first frame update
+    [SerializeField] public float deathAnimationTime = 4f;
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask playerLayer;
+
+    private bool _dead = false;
+    private Rigidbody2D _rigidbody;
+
+    private void Awake()
+    {
+        _rigidbody = GetComponent<Rigidbody2D>();
+    }
     void Start()
     {
         CreateMovementColliders();
@@ -39,25 +49,52 @@ public class FlyingEnemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Vector2.Distance(transform.position, player.position) <= detectionRange && isPatrolling) {
-            isPatrolling = false;
-            following = true;
-            aiPath.enabled = true;
-            gameObject.GetComponent<AIDestinationSetter>().target = playerHead;
-        }
+        _anim.SetBool("Dead", _dead);
 
-        if (isPatrolling) {
-            transform.Translate(Vector2.right * moveSpeed * Time.deltaTime);
-        } else {
-            FacePlayer();
-            if (Vector2.Distance(transform.position, playerHead.position) <= attackRange && !attacking) {
-                attacking = true;
-                _anim.SetTrigger("BatAttack");
-                StartCoroutine(WaitForAttackAnimation(attackDelay));
 
-                StartCoroutine(WaitForBatDivePosition(batDivePosition));
+        if (!_dead) {
+            if (Vector2.Distance(transform.position, player.position) <= detectionRange && isPatrolling)
+            {
+                isPatrolling = false;
+                following = true;
+                aiPath.enabled = true;
+                gameObject.GetComponent<AIDestinationSetter>().target = playerHead;
+            }
+
+            if (isPatrolling)
+            {
+                transform.Translate(Vector2.right * moveSpeed * Time.deltaTime);
+            }
+            else
+            {
+                FacePlayer();
+                if (Vector2.Distance(transform.position, playerHead.position) <= attackRange && !attacking)
+                {
+                    attacking = true;
+                    _anim.SetTrigger("BatAttack");
+                    StartCoroutine(WaitForAttackAnimation(attackDelay));
+
+                    StartCoroutine(WaitForBatDivePosition(batDivePosition));
+                }
             }
         }
+    }
+    public void DeathSequence()
+    {
+        _dead = true;
+        aiPath.enabled = false;
+        _anim.SetTrigger("Die");
+        _rigidbody.isKinematic = false;
+        _rigidbody.AddForce(new Vector2(0, -15), ForceMode2D.Impulse);
+
+        StartCoroutine(WaitAndDestroy(deathAnimationTime));
+    }
+
+    IEnumerator WaitAndDestroy(float delay)
+    {
+        // Wait for the defined duration
+        yield return new WaitForSeconds(delay);
+        Destroy(gameObject);
     }
 
     IEnumerator WaitForAttackAnimation(float delay)
@@ -80,6 +117,26 @@ public class FlyingEnemy : MonoBehaviour
         // Set attacking to false and change the target back to playerHead
         attacking = false;
         gameObject.GetComponent<AIDestinationSetter>().target = playerHead;
+    }
+
+    void OnCollisionEnter2D(Collision2D other)
+    {
+        // Check if collided with the ground
+        if ((IsInLayerMask(other.gameObject.layer, groundLayer) && _dead))
+        {
+            _rigidbody.isKinematic = true;
+            _rigidbody.constraints = RigidbodyConstraints2D.FreezeAll;
+        }
+
+        // Check if collided with player
+        if (IsInLayerMask(other.gameObject.layer, playerLayer) && !_dead)
+        {
+            //Player Damage Flash
+            other.gameObject.GetComponent<DamageFlash>()?.FlashDamage();
+
+            // Call the DecreaseHealth()
+            //other.gameObject.GetComponent<PlayerHealth>()?.TakeDamage(damageAmount);
+        }
     }
 
     void FacePlayer()
@@ -114,5 +171,11 @@ public class FlyingEnemy : MonoBehaviour
         Vector3 newRotation = transform.eulerAngles;
         newRotation.y += 180f;
         transform.eulerAngles = newRotation;
+    }
+
+    // Helper method to check if a layer is within a given LayerMask
+    private bool IsInLayerMask(int layer, LayerMask layerMask)
+    {
+        return layerMask == (layerMask | (1 << layer));
     }
 }

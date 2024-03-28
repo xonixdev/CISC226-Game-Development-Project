@@ -222,7 +222,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: c7a07d116466e814ea0f05ed3f39b359, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -303,6 +303,13 @@ MonoBehaviour:
   attacking: 0
   attackDelay: 0.5
   enemyMovementColliderPrefab: {fileID: 5654360201345585171, guid: 791cbecbab5c47146bb2d718eb2ce2b5, type: 3}
+  deathAnimationTime: 4
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 2112
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!114 &7004327853930205084
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -27,11 +27,15 @@ public class weaponDamage : MonoBehaviour
         // Check if the trigger collision involves the enemy
         if (other.gameObject.CompareTag("Enemy"))
         {
-            Debug.Log("Enemy Hit");
+
             EnemyStats enemyStats = other.GetComponent<EnemyStats>();
 
             enemyStats.health = enemyStats.health - damage;
 
+            //Enemy Damage Flash
+            other.gameObject.GetComponent<DamageFlash>()?.FlashDamage();
+
+            //FIX
             Vector2 knockback = other.transform.position - player.transform.position;
             other.GetComponent<Rigidbody2D>().AddForce(knockback * knockbackForce, ForceMode2D.Impulse);
         }

@@ -170,10 +170,10 @@ namespace FrostFalls
 
         [Tooltip("The player ledge climb animation duration")]
         public float LedgeClimbDuration;
-
         #endregion
 
         #endregion
+
 
         private Rigidbody2D _rb; // Rigidbody component used for physics
         private CapsuleCollider2D _col; // Collider component used for collision detection
@@ -203,6 +203,7 @@ namespace FrostFalls
         private float originalGravityScale;
         private Coroutine resetGravityCoroutine;
         private Animator _animator;
+        private bool _dead;
 
 
         private bool _ignorePlayerInput = false;
@@ -230,6 +231,13 @@ namespace FrostFalls
         {
             // Update time and gather player input for each frame
             _time += Time.deltaTime;
+            
+            if (_dead)
+            {
+                _ignorePlayerInput = true;
+                _rb.constraints = RigidbodyConstraints2D.FreezeAll;
+            }
+
             if (_ignorePlayerInput != true) //Gather player input aslong it's expected
             {
                 GatherInput();

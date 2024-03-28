@@ -9,15 +9,15 @@ public class PanelHandler : MonoBehaviour
     private bool isPanelVisible = false;
 
     // Reference to an instance of TextVisibility
-    public TextVisibilty textVisibiltyScript;
+    public ProximityInteraction imageVisibiltyScript;
 
     void Update()
     {
         // Check if the textVisibilityScript reference is not null
-        if (textVisibiltyScript != null)
+        if (imageVisibiltyScript != null)
         {
             // Access the interactable property directly
-            if (!textVisibiltyScript.interactable)
+            if (!imageVisibiltyScript.interactable)
             {
                 HidePanel();
             }
